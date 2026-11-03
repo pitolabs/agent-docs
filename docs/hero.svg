@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" role="img" aria-labelledby="title" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="title">agent-docs: chat, your agent, S3 bucket, libSQL index, answers</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <rect width="960" height="300" rx="24" fill="url(#bg)"/>
+
+  <text x="48" y="64" font-size="34" font-weight="700" fill="#f8fafc">@pitolabs/agent-docs</text>
+  <text x="48" y="96" font-size="17" fill="#cbd5e1">A document archive your agent can read, search and archive to — with a "yes" from the person first.</text>
+  <rect x="48" y="112" width="160" height="4" rx="2" fill="url(#accent)"/>
+
+  <!-- pipeline -->
+  <g font-size="14" fill="#e2e8f0" text-anchor="middle">
+    <!-- chat -->
+    <rect x="48" y="160" width="150" height="96" rx="14" fill="#1e293b" stroke="#334155"/>
+    <text x="123" y="190" font-size="26">💬</text>
+    <text x="123" y="216" font-weight="600">WhatsApp / chat</text>
+    <text x="123" y="236" fill="#94a3b8" font-size="12">PDFs, photos, docs</text>
+
+    <!-- agent -->
+    <rect x="248" y="160" width="150" height="96" rx="14" fill="#1e293b" stroke="#334155"/>
+    <text x="323" y="190" font-size="26">🤖</text>
+    <text x="323" y="216" font-weight="600">Your agent</text>
+    <text x="323" y="236" fill="#94a3b8" font-size="12">propose → "sim" → save</text>
+
+    <!-- S3 -->
+    <rect x="448" y="160" width="150" height="96" rx="14" fill="#1e293b" stroke="#334155"/>
+    <text x="523" y="190" font-size="26">🪣</text>
+    <text x="523" y="216" font-weight="600">S3 bucket</text>
+    <text x="523" y="236" fill="#94a3b8" font-size="12">documents/YYYY/MM/…</text>
+
+    <!-- index -->
+    <rect x="648" y="160" width="150" height="96" rx="14" fill="#1e293b" stroke="#334155"/>
+    <text x="723" y="190" font-size="26">🔎</text>
+    <text x="723" y="216" font-weight="600">libSQL index</text>
+    <text x="723" y="236" fill="#94a3b8" font-size="12">FTS5 + vectors, RRF</text>
+
+    <!-- answers -->
+    <rect x="848" y="160" width="64" height="96" rx="14" fill="#1e293b" stroke="#334155"/>
+    <text x="880" y="190" font-size="26">💡</text>
+    <text x="880" y="216" font-size="12" font-weight="600">answers</text>
+  </g>
+  <g stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" fill="none">
+    <path d="M198 208 H246"/>
+    <path d="M398 208 H446"/>
+    <path d="M598 208 H646"/>
+    <path d="M798 208 H846"/>
+  </g>
+  <text x="523" y="284" font-size="12" fill="#64748b" text-anchor="middle">a model reads each document once: text, type, title, parties, dates, deadlines, summary</text>
+</svg>
