@@ -33,6 +33,17 @@ Built for [Mastra](https://mastra.ai) agents, with a framework-neutral core you 
   OpenAI-compatible `/embeddings` (Ollama, vLLM, Azure…).
 - 🔒 **Privacy by construction**: errors never carry document text; the index is pinned to its bucket and model.
 
+## 🪶 Light, cheap, yours
+
+- 🪶 **Lightweight**: three runtime dependencies (`@libsql/client`, `aws4fetch`, `zod`), 31 files, 117 kB unpacked, no
+  native build, no vector database to run. The index is one SQLite file next to your agent.
+- 💸 **Low cost**: one model call and one embedding pass per document, ever; searches are a keyword query and one
+  query embedding. Storage is an S3 bucket you already have.
+- 🧘 **Simple to run**: in-process, one file at a time; a crash or a restart only delays reading, the sweep catches up.
+  No queue, no worker, no cron to install.
+- 🔐 **Yours**: your bucket, your database file, your choice of where text goes (Bedrock keeps it in-region; a local
+  OpenAI-compatible server keeps it on your machine). Delete the file and the index rebuilds itself from S3.
+
 ## 🚀 Quick start
 
 ```bash
