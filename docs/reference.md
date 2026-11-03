@@ -40,7 +40,7 @@ length is checked against `dims`.
 
 | URL | Use |
 |---|---|
-| `file:/data/docs-kine.db` | The usual: one file per agent, WAL, `busy_timeout` 5 s. |
+| `file:/data/docs-clerk.db` | The usual: one file per agent, WAL, `busy_timeout` 5 s. |
 | `:memory:` | Tests. |
 | `libsql://<db>.turso.io` + `authToken` | Remote; no PRAGMAs are sent. |
 

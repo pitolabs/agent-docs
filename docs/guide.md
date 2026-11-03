@@ -25,7 +25,7 @@ import { RequestContext } from "@mastra/core/request-context";
 import { grantPass } from "@pitolabs/agent-docs/mastra";
 
 const receipt = gate.receive(); // its place in arrival order, taken as soon as it arrives
-gate.onMessage(conversation, sender, text, receipt); // a whole "sim" approves the pending proposal; anything else drops it
+gate.onMessage(conversation, sender, text, receipt); // a whole "yes" approves the pending proposal; anything else drops it
 gate.setFiles(conversation, files); // this turn's attachments ({ name, mimeType, data }); older ones are replaced
 const requestContext = new RequestContext();
 grantPass(requestContext, { conversation, sender }); // an object only this module mints: strings cannot forge it
@@ -33,21 +33,22 @@ await agent.generate(text, { requestContext });
 ```
 
 - A run **without a pass** (Mastra Studio, the HTTP API, a cron) is refused by every tool that writes or filters, with
-  `where` in the message (`"sem conversa do WhatsApp: escrita só pelo WhatsApp do Kine"`). So a forged proposal cannot
-  be approved by the real person's next "sim".
-- `receive()` matters when turns queue: a "sim" that arrived *before* the proposal existed cannot approve it, even if
+  `where` in the message (`"sem conversa do WhatsApp: escrita só pelo <where>"`). So a forged proposal cannot be
+  approved by the real person's next "yes".
+- `receive()` matters when turns queue: a "yes" that arrived *before* the proposal existed cannot approve it, even if
   its turn runs after.
-- Approval is **the same person**, **within an hour**, **the whole message a yes** (`sim`, `s`, `ok`, `pode`,
-  `confirmo`, `isso`, `beleza`, `👍`, `✅`...; leading `@mentions` ignored). "sim, mas troca o título" is not a yes.
-  Proposals live in memory: a restart drops them.
+- Approval is **the same person**, **within an hour**, **the whole message a yes**. The accepted words are the pt-BR
+  set in `isApproval` (`sim`, `s`, `ok`, `pode`, `confirmo`, `isso`, `beleza`, `👍`, `✅`...; leading `@mentions`
+  ignored); "sim, mas troca o título" ("yes, but change the title") is not a yes. Proposals live in memory: a restart
+  drops them.
 
-If the host batches a burst of messages into one turn, call `onMessage` for each in order: a "sim" then a "👍" stays
-approved; a question after the "sim" drops it.
+If the host batches a burst of messages into one turn, call `onMessage` for each in order: a "yes" then a "👍" stays
+approved; a question after the "yes" drops it.
 
 ## The tools
 
 `archiveTools(opts)` returns the set for one agent. `where` and `archiveName` are the only required strings: they
-appear in refusals and tool descriptions (`"WhatsApp da Villa"`, `"no S3 da Villa"`).
+appear in refusals and tool descriptions (`"WhatsApp da empresa"`, `"no arquivo da empresa"`).
 
 | Tool | What it does |
 |---|---|
@@ -65,8 +66,8 @@ unavailable. Without an `embedder`, search is keyword-only.
 
 ### `extra`: one more write per document
 
-An agent that keeps notes can attach a second write to a proposal (the Villa writes a Markdown note next to each
-archived document). `extra.schema` adds inputs to `propose_file`; `extra.prepare(input, key, reason)` returns a preview
+An agent that keeps notes can attach a second write to a proposal (say, a Markdown note in a knowledge base next to
+each archived document). `extra.schema` adds inputs to `propose_file`; `extra.prepare(input, key, reason)` returns a preview
 (shown with the proposal) and a `commit()` that runs after the upload, whose result is merged into `save`'s reply. Not
 available with `immediate`.
 

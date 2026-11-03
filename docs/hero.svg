@@ -31,7 +31,7 @@
     <rect x="248" y="160" width="150" height="96" rx="14" fill="#1e293b" stroke="#334155"/>
     <text x="323" y="190" font-size="26">🤖</text>
     <text x="323" y="216" font-weight="600">Your agent</text>
-    <text x="323" y="236" fill="#94a3b8" font-size="12">propose → "sim" → save</text>
+    <text x="323" y="236" fill="#94a3b8" font-size="12">propose → "yes" → save</text>
 
     <!-- S3 -->
     <rect x="448" y="160" width="150" height="96" rx="14" fill="#1e293b" stroke="#334155"/>

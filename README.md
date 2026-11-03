@@ -26,7 +26,7 @@ Built for [Mastra](https://mastra.ai) agents, with a framework-neutral core you 
 - 🔎 **Hybrid search in a single libSQL file**: FTS5 keywords (accents folded) + chunk vectors, fused by reciprocal
   rank, filtered by type, year or "a deadline before…".
 - ✅ **A "yes" before anything is written**: `propose_file` shows what will happen; only the same person's next
-  message, if it is just a *sim/ok/👍*, lets `save` run. Or skip it with `immediate: true`.
+  message, if it is just a *yes/ok/👍*, lets `save` run. Or skip it with `immediate: true`.
 - 🧩 **Ready-made Mastra tools**: `received_files`, `propose_file`, `save`, `archive_file`, `list_documents`,
   `search_documents`, `read_document`, `document_link`.
 - 🔌 **Pick your embedder**: any Mastra model id (`openai/text-embedding-3-small`), Amazon Bedrock, OpenRouter, or any
@@ -43,21 +43,21 @@ bun add @pitolabs/agent-docs      # or: npm install @pitolabs/agent-docs
 import { Agent } from "@mastra/core/agent";
 import { ApprovalGate, archiveTools, DocsArchive, docsConfig, extractorAgent, extractWith, mastraEmbedder, openAgentIndex } from "@pitolabs/agent-docs/mastra";
 
-const cfg = docsConfig("KINE"); // KINE_DOCS_BUCKET, _REGION, _AWS_ACCESS_KEY_ID, _AWS_SECRET_ACCESS_KEY
+const cfg = docsConfig("CLERK"); // CLERK_DOCS_BUCKET, _REGION, _AWS_ACCESS_KEY_ID, _AWS_SECRET_ACCESS_KEY
 if ("off" in cfg) throw new Error(cfg.off);
 const docs = new DocsArchive(cfg);
 const embedder = mastraEmbedder("openai/text-embedding-3-small", { dims: 1536 }); // reads OPENAI_API_KEY
 const extractor = extractorAgent({ model: "openai/gpt-4o-mini" });
-const opened = await openAgentIndex({ url: "file:./docs-kine.db", bucket: cfg.bucket, docs, embedder, extract: extractWith(extractor, "openai/gpt-4o-mini") });
+const opened = await openAgentIndex({ url: "file:./docs-clerk.db", bucket: cfg.bucket, docs, embedder, extract: extractWith(extractor, "openai/gpt-4o-mini") });
 if ("off" in opened) throw new Error(opened.off);
 const gate = new ApprovalGate();
 
-export const kine = new Agent({
-	id: "kine",
-	name: "Kine",
+export const clerk = new Agent({
+	id: "clerk",
+	name: "Clerk",
 	model: "openai/gpt-4o-mini",
-	instructions: "Você arquiva e encontra os documentos da empresa.",
-	tools: archiveTools({ gate, docs, ...opened, embedder, where: "WhatsApp do Kine", archiveName: "no S3 da Kine" }),
+	instructions: "You file the company's documents and find them again.",
+	tools: archiveTools({ gate, docs, ...opened, embedder, where: "WhatsApp da empresa", archiveName: "no arquivo da empresa" }),
 });
 opened.indexer.start(); // reads what the bucket has and the index does not, now and every 6 h
 ```

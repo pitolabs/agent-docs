@@ -68,8 +68,8 @@ function stubExtract(opts: { fail?: boolean; hold?: Promise<void> } = {}) {
 }
 
 async function setup(opts: { url?: string; bucket?: string; extract?: Extract } = {}) {
-	const s3 = stubS3(opts.bucket ?? "kine-b");
-	const opened = await LibSQLDocumentStore.open({ url: opts.url ?? ":memory:" }, { bucket: opts.bucket ?? "kine-b", embeddingsModel: MODEL, dims: DIMS });
+	const s3 = stubS3(opts.bucket ?? "bucket-a");
+	const opened = await LibSQLDocumentStore.open({ url: opts.url ?? ":memory:" }, { bucket: opts.bucket ?? "bucket-a", embeddingsModel: MODEL, dims: DIMS });
 	if ("off" in opened) throw new Error(opened.off);
 	const index = opened;
 	const embedder = stubEmbedder();
@@ -82,8 +82,8 @@ async function setup(opts: { url?: string; bucket?: string; extract?: Extract } 
 		index,
 		indexer,
 		embedder,
-		where: "WhatsApp do KineBot",
-		archiveName: "no S3 da Kine",
+		where: "WhatsApp da empresa",
+		archiveName: "no arquivo da empresa",
 	});
 	return { s3, index, indexer, gate, tools, extractCalls: ex.calls };
 }
@@ -290,8 +290,8 @@ describe("search when the embedder cannot embed the query", () => {
 			docs: h.s3.docs,
 			index: h.index,
 			embedder: throttled,
-			where: "WhatsApp do KineBot",
-			archiveName: "no S3 da Kine",
+			where: "WhatsApp da empresa",
+			archiveName: "no arquivo da empresa",
 			log: "[test]",
 		});
 		const r = await exec(tools.search_documents)({ query: "honorarios boleto", limit: 8 }, anyCtx);
@@ -310,39 +310,39 @@ describe("search when the embedder cannot embed the query", () => {
 
 describe("each agent's index is its own", () => {
 	test("the same key in two indexes keeps each agent's text; one agent's words find nothing in the other's", async () => {
-		const kine = await setup({ bucket: "kine-b" });
-		const villa = await setup({ bucket: "villa-b" });
+		const first = await setup({ bucket: "bucket-a" });
+		const second = await setup({ bucket: "bucket-b" });
 		const key = "documents/2026/11/contrato.pdf";
-		kine.indexer.enqueue({
+		first.indexer.enqueue({
 			key,
 			data: Uint8Array.from(Buffer.from("Sociedade Asclepius fisioterapia software")),
 			mimeType: "application/pdf",
 			description: "contrato social",
 		});
-		villa.indexer.enqueue({
+		second.indexer.enqueue({
 			key,
 			data: Uint8Array.from(Buffer.from("Comodato da cabana Casa Lua em Garopaba")),
 			mimeType: "application/pdf",
 			description: "comodato",
 		});
-		await Promise.all([kine.indexer.drain(), villa.indexer.drain()]);
-		const villaSearch = await exec(villa.tools.search_documents)({ query: "fisioterapia software", limit: 8 }, anyCtx);
-		const hits = villaSearch.documents as { path: string; snippet: string }[];
-		// The vector list always returns its nearest chunks; what matters is that Kine's text never comes back.
+		await Promise.all([first.indexer.drain(), second.indexer.drain()]);
+		const secondSearch = await exec(second.tools.search_documents)({ query: "fisioterapia software", limit: 8 }, anyCtx);
+		const hits = secondSearch.documents as { path: string; snippet: string }[];
+		// The vector list always returns its nearest chunks; what matters is that the first agent's text never comes back.
 		expect(hits.every((d) => !d.snippet.includes("fisioterapia"))).toBe(true);
-		expect((await villa.index.get(key))?.text).toBe("Comodato da cabana Casa Lua em Garopaba");
-		expect((await kine.index.get(key))?.text).toBe("Sociedade Asclepius fisioterapia software");
+		expect((await second.index.get(key))?.text).toBe("Comodato da cabana Casa Lua em Garopaba");
+		expect((await first.index.get(key))?.text).toBe("Sociedade Asclepius fisioterapia software");
 	});
 
 	test("a file built for one bucket is refused for another, and for another embeddings model", async () => {
 		const url = `file:${join(mkdtempSync(join(tmpdir(), "idx-")), "docs.db")}`;
-		const first = await LibSQLDocumentStore.open({ url }, { bucket: "kine-b", embeddingsModel: MODEL, dims: DIMS });
+		const first = await LibSQLDocumentStore.open({ url }, { bucket: "bucket-a", embeddingsModel: MODEL, dims: DIMS });
 		if ("off" in first) throw new Error(first.off);
 		first.close();
-		expect(await LibSQLDocumentStore.open({ url }, { bucket: "villa-b", embeddingsModel: MODEL, dims: DIMS })).toEqual({
-			off: expect.stringContaining("belongs to bucket kine-b"),
+		expect(await LibSQLDocumentStore.open({ url }, { bucket: "bucket-b", embeddingsModel: MODEL, dims: DIMS })).toEqual({
+			off: expect.stringContaining("belongs to bucket bucket-a"),
 		});
-		expect(await LibSQLDocumentStore.open({ url }, { bucket: "kine-b", embeddingsModel: "other-model", dims: DIMS })).toEqual({
+		expect(await LibSQLDocumentStore.open({ url }, { bucket: "bucket-a", embeddingsModel: "other-model", dims: DIMS })).toEqual({
 			off: expect.stringContaining("delete the file"),
 		});
 	});
@@ -434,8 +434,8 @@ describe("errors never carry the document's text", () => {
 			docs: h.s3.docs,
 			index: h.index,
 			embedder: echoes,
-			where: "WhatsApp do KineBot",
-			archiveName: "no S3 da Kine",
+			where: "WhatsApp da empresa",
+			archiveName: "no arquivo da empresa",
 			log: "[test]",
 		});
 		const logged: string[] = [];

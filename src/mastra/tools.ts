@@ -57,11 +57,11 @@ export interface ArchiveToolsOptions {
 	indexer?: Indexer;
 	/** For query vectors in search_documents; absent -> keyword search only. */
 	embedder?: Embedder;
-	/** "WhatsApp da Villa", "WhatsApp do KineBot": where a refusal says writes come from. */
+	/** "WhatsApp da empresa": where a refusal says writes come from (pt-BR, it ends a sentence shown to the person). */
 	where: string;
-	/** "do S3 da Villa", "do S3 da Kine": the archive's name in tool descriptions. */
+	/** "no arquivo da empresa": the archive's name in tool descriptions (pt-BR). */
 	archiveName: string;
-	/** Log prefix, e.g. "[kinebot]". */
+	/** Log prefix, e.g. "[clerk]". */
 	log?: string;
 	/** Extra input for propose_file, and how to turn it (with the resolved key) into an Extra. */
 	extra?: {
@@ -69,9 +69,9 @@ export interface ArchiveToolsOptions {
 		description: string;
 		prepare: (input: Record<string, unknown>, key: string, reason: string) => Promise<Extra | { error: string } | undefined>;
 	};
-	/** Proposal kinds other than "document" that save should run (Villa: notes). */
+	/** Proposal kinds other than "document" that save should run (e.g. notes). */
 	runOther?: (p: Proposal) => Promise<Record<string, unknown>>;
-	/** Archive on the model's call, with no "sim": propose_file and save are replaced by archive_file (the Mimo, whose people asked for no confirmation). `extra` is not supported with it. */
+	/** Archive on the model's call, with no "yes": propose_file and save are replaced by archive_file (for people who asked for no confirmation). `extra` is not supported with it. */
 	immediate?: boolean;
 	/** Which keys the run's sender may see and write (needs the pass, so Studio/API runs are refused). Read tools hide other keys; propose_file / archive_file refuse them with `hint`. */
 	keyFilter?: { allow: (key: string, who: Who) => boolean; hint: string };
