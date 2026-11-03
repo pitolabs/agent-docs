@@ -37,10 +37,10 @@ await agent.generate(text, { requestContext });
   approved by the real person's next "yes".
 - `receive()` matters when turns queue: a "yes" that arrived *before* the proposal existed cannot approve it, even if
   its turn runs after.
-- Approval is **the same person**, **within an hour**, **the whole message a yes**. The accepted words are the pt-BR
-  set in `isApproval` (`sim`, `s`, `ok`, `pode`, `confirmo`, `isso`, `beleza`, `👍`, `✅`...; leading `@mentions`
-  ignored); "sim, mas troca o título" ("yes, but change the title") is not a yes. Proposals live in memory: a restart
-  drops them.
+- Approval is **the same person**, **within an hour**, **the whole message a yes**. The accepted words are the list in
+  `isApproval`: English (`yes`, `y`, `yep`, `sure`, `go ahead`, `save it`, `confirm`...) and pt-BR (`sim`, `s`, `ok`,
+  `pode`, `confirmo`, `isso`, `beleza`...), plus `👍` and `✅`; leading `@mentions` ignored. "yes, but change the
+  title" is not a yes. Proposals live in memory: a restart drops them.
 
 If the host batches a burst of messages into one turn, call `onMessage` for each in order: a "yes" then a "👍" stays
 approved; a question after the "yes" drops it.

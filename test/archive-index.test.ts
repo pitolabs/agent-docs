@@ -186,17 +186,20 @@ describe("archiving a document indexes it", () => {
 		h.index.close();
 	});
 
-	test('save without a prior "sim" is refused; a file is archived only once per approval', async () => {
+	test('save without a prior yes is refused; "yes, but…" drops the proposal; an English "yes" archives, once', async () => {
 		const h = await setup();
 		const wa = whatsapp(h.tools, h.gate);
 		await wa.send("guarda isso", { name: "Contrato.pdf", body: BODY });
 		await wa.send("e o título?");
 		expect(wa.results[1]).toMatchObject({ refused: expect.stringContaining("não há proposta pendente") });
 		await wa.send("guarda isso", { name: "Contrato.pdf", body: BODY });
-		await wa.send("sim");
-		expect(wa.results[3]).toMatchObject({ file: "documents/2026/11/contrato-contabilidade-2026-11-03.pdf" });
-		await wa.send("sim");
-		expect(wa.results[4]).toMatchObject({ refused: expect.stringContaining("não há proposta pendente") });
+		await wa.send("yes, but change the title");
+		expect(wa.results[3]).toMatchObject({ refused: expect.stringContaining("não há proposta pendente") });
+		await wa.send("guarda isso", { name: "Contrato.pdf", body: BODY });
+		await wa.send("yes");
+		expect(wa.results[5]).toMatchObject({ file: "documents/2026/11/contrato-contabilidade-2026-11-03.pdf" });
+		await wa.send("yes");
+		expect(wa.results[6]).toMatchObject({ refused: expect.stringContaining("não há proposta pendente") });
 		await h.indexer.drain();
 	});
 

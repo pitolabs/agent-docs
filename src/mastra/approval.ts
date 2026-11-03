@@ -29,13 +29,14 @@ export interface InboxFile {
 	data: Uint8Array<ArrayBuffer>;
 }
 
+/** A whole message that only says yes, in pt-BR or English; the same list the docs promise. */
 const YES =
-	/^(sim|s|ok|okay|pode|pode sim|pode gravar|pode arquivar|grava|gravar|arquiva|arquivar|confirmo|confirmado|confirma|isso|isso mesmo|manda|beleza|blz|👍|✅)[\s.!]*$/iu;
+	/^(sim|s|ok|okay|pode|pode sim|pode gravar|pode arquivar|grava|gravar|arquiva|arquivar|confirmo|confirmado|confirma|isso|isso mesmo|manda|beleza|blz|yes|y|yep|yeah|sure|go ahead|do it|save|save it|archive|archive it|confirm|confirmed|👍|✅)[\s.!]*$/iu;
 const TTL_MS = 60 * 60_000;
 
 /**
- * A whole message that only says yes. "sim, mas troca o título" is not a yes. Leading @mentions ("@12025550123 sim",
- * how a group confirmation reads) are not part of the answer.
+ * A whole message that only says yes. "sim, mas troca o título" / "yes, but change the title" is not a yes. Leading
+ * @mentions ("@12025550123 sim", how a group confirmation reads) are not part of the answer.
  */
 export const isApproval = (text: string): boolean =>
 	YES.test(
