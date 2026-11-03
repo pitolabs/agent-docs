@@ -1,5 +1,6 @@
-# Publishes the GitHub release's version to npm with trusted publishing (OIDC): no token in the repository. npm is
-# configured on npmjs.com for @pitolabs/agent-docs from pitolabs/agent-docs, workflow publish.yml.
+# Publishes the GitHub release's version to npm. The first release uses a short-lived granular token (repository
+# secret NPM_TOKEN: npm lets a trusted publisher be configured only on a package that already exists); from the second
+# on, trusted publishing (OIDC) with provenance, no token anywhere.
 name: publish
 on:
   release:
@@ -21,4 +22,6 @@ jobs:
       - run: bun run prepublishOnly
       # The tag is the version: v0.1.0 publishes package.json's 0.1.0, and a mismatch stops here.
       - run: test "v$(node -p "require('./package.json').version")" = "${{ github.event.release.tag_name }}"
-      - run: npm publish --access public --provenance
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
