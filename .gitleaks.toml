@@ -1,0 +1,54 @@
+# gitleaks' default secret rules, plus personal data that has no place in a public repository. Exact names, numbers
+# and hosts go in the private blocklist (scripts/privacy-scan.sh), not here: this file is public.
+title = "public-repo-standard"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "phone-br"
+description = "Brazilian phone number: 55 + area code + number, as digits (WhatsApp, E.164) or written +55 (51) 9...."
+regex = '''(?:^|[^0-9.])((?:\+?55[1-9][0-9]9?[0-9]{8})|(?:\+55 ?\(?[1-9][0-9]\)? ?9?[0-9]{4}[- ]?[0-9]{4}))(?:[^0-9]|$)'''
+secretGroup = 1
+keywords = ["55"]
+
+[[rules]]
+id = "email-address"
+description = "E-mail address other than example domains and GitHub noreply"
+regex = '''([A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})'''
+secretGroup = 1
+keywords = ["@"]
+
+[[rules.allowlists]]
+regexes = [
+  '''@example\.(com|org|net)$''',
+  '''@users\.noreply\.github\.com$''',
+  '''^noreply@github\.com$''',
+  '''^git@github\.com$''',
+]
+
+[[rules]]
+id = "ipv4-address"
+description = "IPv4 address outside loopback and the documentation ranges (RFC 5737)"
+regex = '''(?:^|[^0-9.])((?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])(?:\.(?:25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])){3})(?:[^0-9.]|$)'''
+secretGroup = 1
+
+[[rules.allowlists]]
+regexes = [
+  '''^127\.''',
+  '''^0\.0\.0\.0$''',
+  '''^255\.255\.255\.255$''',
+  '''^192\.0\.2\.''',
+  '''^198\.51\.100\.''',
+  '''^203\.0\.113\.''',
+]
+
+[[rules]]
+id = "home-path"
+description = "Absolute path inside a user's home directory (names the user and the machine layout)"
+regex = '''(/(?:Users|home)/[A-Za-z0-9._-]+)/'''
+secretGroup = 1
+keywords = ["/users/", "/home/"]
+
+[[rules.allowlists]]
+regexes = ['''^/home/runner$''', '''^/Users/runner$''']

@@ -1,0 +1,24 @@
+#!/bin/sh
+# Scans every commit about to be published before it leaves the machine. In a public repository a push of any branch,
+# or a pull request, publishes its commits; CI runs after that, so this hook (with GitHub's push protection for known
+# token formats) is what actually keeps them private. Turned on with core.hooksPath .githooks, like pre-commit.
+set -eu
+top=$(git rev-parse --show-toplevel)
+remote=$1
+status=0
+# Git sends one line per ref: <local ref> <local sha> <remote ref> <remote sha>; an all-zero sha means "none".
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+  case $local_sha in *[!0]*) ;; *) continue ;; esac # deleting a ref publishes nothing
+  case $remote_sha in
+    *[!0]*)
+      if git cat-file -e "$remote_sha^{commit}" 2>/dev/null; then
+        revs="$remote_sha..$local_sha"
+      else
+        revs="$local_sha --not --remotes=$remote" # the remote moved on (force push): everything it has not seen
+      fi
+      ;;
+    *) revs="$local_sha --not --remotes=$remote" ;; # a new branch: every commit no remote branch has yet
+  esac
+  sh "$top/scripts/privacy-scan.sh" --commits "$revs" || status=1
+done
+exit $status

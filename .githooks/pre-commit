@@ -1,0 +1,25 @@
+#!/bin/sh
+# Formats the staged files with the repo's pinned Biome before each commit (after Biome's shell recipe,
+# https://biomejs.dev/recipes/git-hooks/#shell-script). Turned on by `bun install` ("prepare" in package.json sets
+# core.hooksPath to .githooks). scripts/biome.sh runs only the pinned Biome in node_modules.
+set -eu
+
+# Privacy first: refuse a commit whose staged changes carry a secret or personal data (public-repo standard).
+sh "$(git rev-parse --show-toplevel)/scripts/privacy-scan.sh" --staged
+
+# The formatter rewrites the working-tree file and `git update-index --again` re-stages it whole, so a staged file
+# that also has unstaged edits would get those edits committed. Refuse any path in both the staged and the unstaged
+# diff, whatever its status letters (MM, AM, RM, CM). Each list names a path once, so a path in both is a duplicate.
+both=$({
+  git diff --cached --name-only --diff-filter=ACMR
+  git diff --name-only
+} | sort | uniq -d)
+if [ -n "$both" ]; then
+  echo "pre-commit: these staged files also have unstaged changes; stage them (git add) or set the changes aside first:" >&2
+  printf '%s\n' "$both" | sed 's/^/  /' >&2
+  exit 1
+fi
+
+sh "$(git rev-parse --show-toplevel)/scripts/biome.sh" check --write --staged --files-ignore-unknown=true --no-errors-on-unmatched
+# Re-stage what the formatter rewrote: only already-staged paths, none of which has unstaged changes (checked above).
+git update-index --again

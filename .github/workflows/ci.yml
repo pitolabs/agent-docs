@@ -1,0 +1,39 @@
+# Pin actions and Bun by version; the lockfile pins the rest.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: oven-sh/setup-bun@v2.2.0 # with no version given, it reads "packageManager": "bun@x.y.z" from package.json
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+      - run: bun run format:check # biome ci: formatting, lint and imports, never writes
+      - run: bun run typecheck
+      - run: bun test
+      - run: bun run build
+      # What a consumer imports, under Node: both entry points load, and the core one pulls no framework.
+      - run: node --input-type=module -e "import('./dist/core/index.js').then(m => { if (typeof m.LibSQLDocumentStore !== 'function') process.exit(1) })"
+      - run: node --input-type=module -e "import('./dist/mastra/index.js').then(m => { if (typeof m.archiveTools !== 'function') process.exit(1) })"
+      - run: "! grep -rn '@mastra' dist/core"
+
+  # A backstop, not prevention: when it runs, the commits are already public. It catches what a machine without the
+  # hooks pushed, and new rules applied to old history.
+  privacy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0 # every commit, not only the last one
+      - run: sh scripts/privacy-scan.sh --history
+        env:
+          # Repository secret: the blocklist's text (gh secret set PRIVACY_BLOCKLIST < ~/.config/privacy/blocklist.txt).
+          PRIVACY_BLOCKLIST_TEXT: ${{ secrets.PRIVACY_BLOCKLIST }}
+          # A pull request from a fork gets no secrets: scan it with gitleaks and the identity check only.
+          PRIVACY_BLOCKLIST_OPTIONAL: ${{ github.event.pull_request.head.repo.fork || false }}

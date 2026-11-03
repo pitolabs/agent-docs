@@ -1,0 +1,24 @@
+# Publishes the GitHub release's version to npm with trusted publishing (OIDC): no token in the repository. npm is
+# configured on npmjs.com for @pitolabs/agent-docs from pitolabs/agent-docs, workflow publish.yml.
+name: publish
+on:
+  release:
+    types: [published]
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: oven-sh/setup-bun@v2.2.0
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: bun install --frozen-lockfile
+      - run: bun run prepublishOnly
+      # The tag is the version: v0.1.0 publishes package.json's 0.1.0, and a mismatch stops here.
+      - run: test "v$(node -p "require('./package.json').version")" = "${{ github.event.release.tag_name }}"
+      - run: npm publish --access public --provenance

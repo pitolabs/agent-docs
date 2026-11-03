@@ -1,0 +1,3 @@
+# `bun add` writes exact versions ("2.6.4", not "^2.6.4"): the lockfile pins everything, and package.json says so too.
+[install]
+exact = true

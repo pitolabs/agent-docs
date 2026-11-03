@@ -1,0 +1,75 @@
+{
+	"name": "@pitolabs/agent-docs",
+	"version": "0.1.0",
+	"description": "S3 document archive with LLM extraction, hybrid libSQL search (FTS5 + vectors) and Mastra agent tools",
+	"type": "module",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/pitolabs/agent-docs.git"
+	},
+	"homepage": "https://github.com/pitolabs/agent-docs#readme",
+	"bugs": {
+		"url": "https://github.com/pitolabs/agent-docs/issues"
+	},
+	"keywords": [
+		"mastra",
+		"agent",
+		"documents",
+		"s3",
+		"libsql",
+		"sqlite",
+		"fts5",
+		"hybrid-search",
+		"rag"
+	],
+	"packageManager": "bun@1.4.3",
+	"engines": {
+		"node": ">=22.13.0"
+	},
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE"
+	],
+	"sideEffects": false,
+	"exports": {
+		".": {
+			"types": "./dist/core/index.d.ts",
+			"import": "./dist/core/index.js"
+		},
+		"./mastra": {
+			"types": "./dist/mastra/index.d.ts",
+			"import": "./dist/mastra/index.js"
+		}
+	},
+	"scripts": {
+		"format": "sh scripts/biome.sh check --write .",
+		"format:check": "sh scripts/biome.sh ci .",
+		"typecheck": "tsc --noEmit",
+		"test": "bun test test/",
+		"build": "tsc -p tsconfig.build.json",
+		"prepublishOnly": "bun run format:check && bun run typecheck && bun test && bun run build",
+		"prepare": "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks || true"
+	},
+	"dependencies": {
+		"@libsql/client": "0.18.0",
+		"aws4fetch": "1.0.20",
+		"zod": "4.6.7"
+	},
+	"peerDependencies": {
+		"@mastra/core": ">=1.79.0"
+	},
+	"peerDependenciesMeta": {
+		"@mastra/core": {
+			"optional": true
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.6.4",
+		"@mastra/core": "1.79.0",
+		"@types/bun": "1.4.3",
+		"@types/node": "24.19.2",
+		"typescript": "7.0.2"
+	}
+}
