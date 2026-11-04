@@ -1,6 +1,7 @@
-# Publishes the GitHub release's version to npm. The first release uses a short-lived granular token (repository
-# secret NPM_TOKEN: npm lets a trusted publisher be configured only on a package that already exists); from the second
-# on, trusted publishing (OIDC) with provenance, no token anywhere.
+# Publishes the GitHub release's version to npm through trusted publishing (OIDC): npmjs.com trusts this repository's
+# publish.yml (package settings → Trusted Publisher, with `npm publish` allowed), the job proves who it is with
+# GitHub's id-token, and npm adds a provenance attestation. No token anywhere. (0.1.0 and 0.1.1 used a short-lived
+# token: npm lets a trusted publisher be configured only on a package that already exists.)
 name: publish
 on:
   release:
@@ -18,10 +19,10 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later; pinned rather than whatever the Node release bundles.
+      - run: npm install -g npm@11.6.2
       - run: bun install --frozen-lockfile
       - run: bun run prepublishOnly
-      # The tag is the version: v0.1.0 publishes package.json's 0.1.0, and a mismatch stops here.
+      # The tag is the version: v0.1.2 publishes package.json's 0.1.2, and a mismatch stops here.
       - run: test "v$(node -p "require('./package.json').version")" = "${{ github.event.release.tag_name }}"
       - run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
