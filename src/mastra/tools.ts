@@ -381,12 +381,14 @@ export function archiveTools(opts: ArchiveToolsOptions): Pick<Tools, Shared | "a
 
 /**
  * How to work with the archive, for the agent's system prompt (pt-BR, like the tool descriptions), built from the same
- * options as archiveTools so it always describes the tools the agent has: the confirmation flow or immediate
- * archiving, and the key filter's rule. Nothing about the documents themselves: a host appends it to its own prompt.
+ * options as archiveTools so it always describes the tools the agent has: that files which are not notes live only in
+ * the archive (never in the notes base, which only links them), the confirmation flow or immediate archiving, and the
+ * key filter's rule. Nothing about the documents themselves: a host appends it to its own prompt.
  */
 export function archiveInstructions(opts: Pick<ArchiveToolsOptions, "archiveName" | "immediate" | "keyFilter">): string {
 	const lines = [
 		`Arquivo de documentos ${opts.archiveName}: PDFs, fotos e documentos em documents/AAAA/MM/<nome>, cada um com uma descrição de uma linha.`,
+		"- Arquivos que não são notas (PDF, fotos, imagens, documentos de escritório) moram só no arquivo: nunca como arquivo na base de notas nem embutidos numa nota (![[...]]); uma nota só linka o caminho que o arquivo devolveu.",
 		"- Para achar: search_documents (palavras, significado, tipo, ano, vencimento até uma data); list_documents só para folhear um mês. Para responder sobre o conteúdo, leia com read_document e cite o caminho. Para mandar um documento a alguém, document_link (vale 7 dias).",
 		"- Para arquivar um arquivo recebido na conversa (received_files lista os da última mensagem com anexo): leia o conteúdo e identifique tipo, data, partes e prazos; nome em kebab-case com a data (ex.: nf-ferragem-silva-2026-11-03.pdf) e o mês do próprio documento.",
 	];
