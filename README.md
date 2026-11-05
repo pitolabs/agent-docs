@@ -52,7 +52,17 @@ bun add @pitolabs/agent-docs      # or: npm install @pitolabs/agent-docs
 
 ```ts
 import { Agent } from "@mastra/core/agent";
-import { ApprovalGate, archiveTools, DocsArchive, docsConfig, extractorAgent, extractWith, mastraEmbedder, openAgentIndex } from "@pitolabs/agent-docs/mastra";
+import {
+	ApprovalGate,
+	archiveInstructions,
+	archiveTools,
+	DocsArchive,
+	docsConfig,
+	extractorAgent,
+	extractWith,
+	mastraEmbedder,
+	openAgentIndex,
+} from "@pitolabs/agent-docs/mastra";
 
 const cfg = docsConfig("CLERK"); // CLERK_DOCS_BUCKET, _REGION, _AWS_ACCESS_KEY_ID, _AWS_SECRET_ACCESS_KEY
 if ("off" in cfg) throw new Error(cfg.off);
@@ -62,13 +72,15 @@ const extractor = extractorAgent({ model: "openai/gpt-4o-mini" });
 const opened = await openAgentIndex({ url: "file:./docs-clerk.db", bucket: cfg.bucket, docs, embedder, extract: extractWith(extractor, "openai/gpt-4o-mini") });
 if ("off" in opened) throw new Error(opened.off);
 const gate = new ApprovalGate();
+const archive = { gate, docs, ...opened, embedder, where: "WhatsApp da empresa", archiveName: "no arquivo da empresa" };
 
 export const clerk = new Agent({
 	id: "clerk",
 	name: "Clerk",
 	model: "openai/gpt-4o-mini",
-	instructions: "You file the company's documents and find them again.",
-	tools: archiveTools({ gate, docs, ...opened, embedder, where: "WhatsApp da empresa", archiveName: "no arquivo da empresa" }),
+	// archiveInstructions: how to search, propose, wait for the "sim" and save, for exactly these tools.
+	instructions: ["You file the company's documents and find them again.", archiveInstructions(archive)].join("\n\n"),
+	tools: archiveTools(archive),
 });
 opened.indexer.start(); // reads what the bucket has and the index does not, now and every 6 h
 ```

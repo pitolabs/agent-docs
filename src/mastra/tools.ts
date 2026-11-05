@@ -378,3 +378,31 @@ export function archiveTools(opts: ArchiveToolsOptions): Pick<Tools, Shared | "a
 	const { propose_file, save, archive_file, ...shared } = buildTools(opts);
 	return opts.immediate ? { ...shared, archive_file } : { ...shared, propose_file, save };
 }
+
+/**
+ * How to work with the archive, for the agent's system prompt (pt-BR, like the tool descriptions), built from the same
+ * options as archiveTools so it always describes the tools the agent has: the confirmation flow or immediate
+ * archiving, and the key filter's rule. Nothing about the documents themselves: a host appends it to its own prompt.
+ */
+export function archiveInstructions(opts: Pick<ArchiveToolsOptions, "archiveName" | "immediate" | "keyFilter">): string {
+	const lines = [
+		`Arquivo de documentos ${opts.archiveName}: PDFs, fotos e documentos em documents/AAAA/MM/<nome>, cada um com uma descrição de uma linha.`,
+		"- Para achar: search_documents (palavras, significado, tipo, ano, vencimento até uma data); list_documents só para folhear um mês. Para responder sobre o conteúdo, leia com read_document e cite o caminho. Para mandar um documento a alguém, document_link (vale 7 dias).",
+		"- Para arquivar um arquivo recebido na conversa (received_files lista os da última mensagem com anexo): leia o conteúdo e identifique tipo, data, partes e prazos; nome em kebab-case com a data (ex.: nf-ferragem-silva-2026-11-03.pdf) e o mês do próprio documento.",
+	];
+	if (opts.immediate) {
+		lines.push(
+			"- Arquive com archive_file, sem pedir confirmação. Se ele responder already_archived, o mesmo arquivo já está arquivado: diga onde e não arquive de novo.",
+		);
+	} else {
+		lines.push(
+			'- Proponha com propose_file, mostre a proposta e pergunte se pode arquivar. Só chame save depois que a próxima mensagem da mesma pessoa for um "sim" (ou "ok", "pode"); se ela pedir ajuste, proponha de novo; se save recusar, explique e proponha de novo. save executa a proposta pendente da conversa, uma por vez.',
+			"- Se propose_file avisar que um arquivo idêntico já está arquivado, diga onde e pergunte se ainda quer arquivar.",
+		);
+	}
+	lines.push(
+		"- Nunca diga que arquivou sem o retorno da ferramenta. O caminho final é o que ela devolve (pode ganhar -2 se o nome já existia); numa nota, linke o arquivo como (s3:<caminho>), seguindo as regras da base de notas.",
+	);
+	if (opts.keyFilter) lines.push(`- ${opts.keyFilter.hint}`);
+	return lines.join("\n");
+}

@@ -50,6 +50,12 @@ approved; a question after the "yes" drops it.
 `archiveTools(opts)` returns the set for one agent. `where` and `archiveName` are the only required strings: they
 appear in refusals and tool descriptions (`"WhatsApp da empresa"`, `"no arquivo da empresa"`).
 
+`archiveInstructions(opts)`, with the same options, returns the how-to for the agent's prompt (pt-BR): how to search
+and read, the naming of a document, propose → show → wait for the "sim" → `save` (or `archive_file` with
+`immediate`), duplicates, and linking the final key as `(s3:<key>)` in a note. It names only the tools those options
+produce, and includes the `keyFilter` hint. Append it to the agent's own instructions, which then carry only what is
+the agent's (who it is, who it talks to, where its notes are kept).
+
 | Tool | What it does |
 |---|---|
 | `received_files` | The turn's attachments, with index, name, type and size. |
