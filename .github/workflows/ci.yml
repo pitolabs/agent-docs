@@ -23,10 +23,28 @@ jobs:
       - run: bun run typecheck
       - run: bun test
       - run: bun run build
-      # What a consumer imports, under Node: both entry points load, and the core one pulls no framework.
+      - run: "! grep -rn '@mastra' dist/core" # the core entry point pulls no framework
+
+  # What a consumer imports, on every Node major the package supports: the oldest version engines allows (>=22.13.0),
+  # the current LTS and the newest. Bun runs the tests; this proves the built entry points load under Node.
+  node:
+    runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["22.13.0", "24", "26"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0 (no version given: reads "packageManager": "bun@x.y.z")
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+      - run: bun install --frozen-lockfile
+      - run: bun run build
       - run: node --input-type=module -e "import('./dist/core/index.js').then(m => { if (typeof m.LibSQLDocumentStore !== 'function') process.exit(1) })"
       - run: node --input-type=module -e "import('./dist/mastra/index.js').then(m => { if (typeof m.archiveTools !== 'function') process.exit(1) })"
-      - run: "! grep -rn '@mastra' dist/core"
 
   # base-repo-standard: secrets in the history, workflows, shell scripts and known vulnerabilities in the lockfiles, with
   # the tools pinned in mise.toml. `cache: false`: mise checks each download against mise.lock, but a restored tool

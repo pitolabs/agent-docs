@@ -1,4 +1,11 @@
 {
 	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
-	"extends": ["local>pitolabs/renovate-config"]
+	"extends": ["local>pitolabs/renovate-config", "local>pitolabs/renovate-config:automerge"],
+	"packageRules": [
+		{
+			"description": "@types/node follows the oldest Node in engines (>=22.13.0): newer types would accept APIs that break consumers on Node 22",
+			"matchPackageNames": ["@types/node"],
+			"allowedVersions": "<23"
+		}
+	]
 }
