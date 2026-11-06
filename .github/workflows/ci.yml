@@ -1,16 +1,21 @@
-# Pin actions and Bun by version; the lockfile pins the rest.
+# Actions are pinned by commit SHA (Renovate keeps the SHA and the version comment current) and Bun by version; the
+# lockfile pins the rest. The token is read-only.
 name: ci
 on:
   push:
     branches: [main]
   pull_request:
+permissions:
+  contents: read
 jobs:
   checks:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: oven-sh/setup-bun@v2.2.0 # with no version given, it reads "packageManager": "bun@x.y.z" from package.json
-      - uses: actions/setup-node@v7.1.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0 (no version given: reads "packageManager": "bun@x.y.z")
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
       - run: bun install --frozen-lockfile
@@ -23,14 +28,41 @@ jobs:
       - run: node --input-type=module -e "import('./dist/mastra/index.js').then(m => { if (typeof m.archiveTools !== 'function') process.exit(1) })"
       - run: "! grep -rn '@mastra' dist/core"
 
+  # base-repo-standard: secrets in the history, workflows, shell scripts and known vulnerabilities in the lockfiles, with
+  # the tools pinned in mise.toml. `cache: false`: mise checks each download against mise.lock, but a restored tool
+  # cache would be trusted as-is.
+  base:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks scans every commit
+          persist-credentials: false
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        with:
+          cache: false # tools are verified against mise.lock on every download; a restored cache is not
+      - run: mise run check:secrets
+      - run: mise run check:workflows
+        env:
+          GH_TOKEN: ${{ github.token }} # zizmor's online audits (known-vulnerable-actions, stale refs)
+      - run: mise run check:shell
+      - run: mise run check:vulns
+
   # A backstop, not prevention: when it runs, the commits are already public. It catches what a machine without the
-  # hooks pushed, and new rules applied to old history.
+  # hooks pushed, and new rules applied to old history. privacy-scan.sh runs the gitleaks pinned in mise.toml.
   privacy:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # every commit, not only the last one
+          persist-credentials: false
+          # A pull request's own commits, not the test merge GitHub makes for it: that one is authored with the
+          # opener's GitHub e-mail setting and never reaches main.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
+        with:
+          cache: false # tools are verified against mise.lock on every download; a restored cache is not
       - run: sh scripts/privacy-scan.sh --history
         env:
           # Repository secret: the blocklist's text (gh secret set PRIVACY_BLOCKLIST < ~/.config/privacy/blocklist.txt).

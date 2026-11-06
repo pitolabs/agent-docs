@@ -1,7 +1,7 @@
 #!/bin/sh
 # Refuses content that must not reach a public repository, with three checks:
-#   1. gitleaks (pinned, scripts/gitleaks.sh): secrets with its default rules, plus the personal-data rules in
-#      .gitleaks.toml (phone numbers, e-mail addresses, IP addresses, home-directory paths);
+#   1. gitleaks (pinned in mise.toml, from base-repo-standard): secrets with its default rules, plus the personal-data
+#      rules in .gitleaks.toml (phone numbers, e-mail addresses, IP addresses, home-directory paths);
 #   2. identities: every commit's author and committer e-mail must be a GitHub noreply address, since a public
 #      repository publishes them;
 #   3. private lists of exact text kept OUTSIDE the repository, one entry per line (# comments; entries shorter
@@ -21,7 +21,7 @@ set -eu
 mode=${1:-}
 revs=${2:-}
 top=$(git rev-parse --show-toplevel)
-here=$(cd "$(dirname "$0")" && pwd)
+command -v mise >/dev/null || { echo "privacy-scan: mise is required (brew install mise)" >&2; exit 1; }
 case "$mode" in
   --staged) ;;
   --commits) [ -n "$revs" ] || { echo "privacy-scan: --commits needs git log arguments" >&2; exit 2; } ;;
@@ -96,7 +96,7 @@ if [ "$mode" = --staged ]; then
 else
   set -- git --log-opts="--diff-merges=first-parent $revs"
 fi
-{ sh "$here/gitleaks.sh" "$@" --redact -v --no-banner --log-level warn "$top" 2>&1 || : >"$tmp/gitleaks.failed"; } | mask >&2
+{ mise -C "$top" exec -- gitleaks "$@" --redact -v --no-banner --log-level warn "$top" 2>&1 || : >"$tmp/gitleaks.failed"; } | mask >&2
 [ ! -f "$tmp/gitleaks.failed" ] || failed="$failed gitleaks"
 
 # 2. identities. GitHub's own web commits use noreply@github.com as committer.

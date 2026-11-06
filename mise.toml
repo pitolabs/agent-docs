@@ -1,0 +1,28 @@
+# Pinned CI/hook tools (base-repo-standard). `mise install` fetches these exact releases and checks each
+# download against mise.lock; Renovate bumps the versions. Run a check with `mise run check:<name>`.
+[tools]
+"aqua:gitleaks/gitleaks" = "8.30.1"
+"aqua:jdx/jactionlint" = "2.5.0"
+"aqua:zizmorcore/zizmor" = "1.32.0"
+"aqua:google/osv-scanner" = "2.7.0"
+"aqua:koalaman/shellcheck" = "0.11.0"
+
+[tasks."check:secrets"]
+description = "Secrets anywhere in the history (gitleaks; .gitleaks.toml adds rules when present)"
+run = "gitleaks git --redact --no-banner --log-level warn --exit-code 1 ."
+
+[tasks."check:workflows"]
+description = "GitHub workflows: syntax, expressions, runner labels + shellcheck on run steps (jactionlint's correctness profile, what actionlint checks), security (zizmor)"
+run = ["jactionlint --profile correctness --ignore pyflakes", "zizmor --no-progress ."]
+
+[tasks."check:shell"]
+description = "Tracked shell scripts (*.sh, .githooks/*) with the pinned shellcheck; `# shellcheck source=` paths are relative to the script"
+run = 'files=$(git ls-files "*.sh" ".githooks/*"); [ -z "$files" ] || shellcheck -x -P SCRIPTDIR $files'
+
+[tasks."check:vulns"]
+description = "Known vulnerabilities in lockfiles (osv-scanner; osv-scanner.toml holds dated ignores)"
+run = 'osv-scanner scan source --recursive . || { s=$?; [ "$s" -eq 128 ] && echo "osv-scanner: nothing to scan" || exit "$s"; }'
+
+[tasks.check]
+description = "Every base check"
+depends = ["check:secrets", "check:workflows", "check:shell", "check:vulns"]

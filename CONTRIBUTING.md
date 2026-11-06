@@ -6,12 +6,15 @@ Thanks for stopping by. Issues and pull requests are welcome; small, focused cha
 
 ```bash
 git clone git@github.com:pitolabs/agent-docs.git && cd agent-docs
-bun install          # also turns the git hooks on (core.hooksPath .githooks)
+mise install        # the pinned gitleaks, jactionlint, zizmor, shellcheck and osv-scanner (brew install mise)
+bun install         # also turns the git hooks on (core.hooksPath .githooks)
 bun run typecheck && bun test && bun run format:check
+mise run check      # secrets in the history, workflows, shell scripts, known vulnerabilities in bun.lock
 ```
 
 Bun 1.4 (`packageManager` in `package.json`) and Biome 2.6 pinned in `devDependencies`; Biome runs only through
-`scripts/biome.sh`, never from PATH. `bun run format` formats; `bun run build` emits `dist/`.
+`scripts/biome.sh`, never from PATH. `bun run format` formats; `bun run build` emits `dist/`. The check tools are
+pinned in `mise.toml`, each download checked against `mise.lock`; Renovate bumps them.
 
 ## The hooks
 
