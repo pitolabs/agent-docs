@@ -56,7 +56,7 @@ jobs:
         with:
           fetch-depth: 0 # gitleaks scans every commit
           persist-credentials: false
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
           cache: false # tools are verified against mise.lock on every download; a restored cache is not
       - run: mise run check:secrets
@@ -78,7 +78,7 @@ jobs:
           # A pull request's own commits, not the test merge GitHub makes for it: that one is authored with the
           # opener's GitHub e-mail setting and never reaches main.
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
         with:
           cache: false # tools are verified against mise.lock on every download; a restored cache is not
       - run: sh scripts/privacy-scan.sh --history
