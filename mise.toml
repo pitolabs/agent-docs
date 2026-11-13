@@ -2,7 +2,7 @@
 # download against mise.lock; Renovate bumps the versions. Run a check with `mise run check:<name>`.
 [tools]
 "aqua:gitleaks/gitleaks" = "8.30.1"
-"aqua:jdx/jactionlint" = "2.5.0"
+"aqua:jdx/jactionlint" = "2.6.0"
 "aqua:zizmorcore/zizmor" = "1.32.0"
 "aqua:google/osv-scanner" = "2.7.1"
 "aqua:koalaman/shellcheck" = "0.11.0"
