@@ -7,8 +7,8 @@ useDefault = true
 
 [[rules]]
 id = "phone-br"
-description = "Brazilian phone number: 55 + area code + number, as digits (WhatsApp, E.164) or written +55 (51) 9...."
-regex = '''(?:^|[^0-9.])((?:\+?55[1-9][0-9]9?[0-9]{8})|(?:\+55 ?\(?[1-9][0-9]\)? ?9?[0-9]{4}[- ]?[0-9]{4}))(?:[^0-9]|$)'''
+description = "Brazilian phone number: 55 + area code + number, as digits (WhatsApp, E.164) or written +55 (51) 9..., not inside a word or a hex hash (a sha256 like ...e551727920926f... in a lockfile)"
+regex = '''(?:^|[^0-9A-Za-z.])((?:\+?55[1-9][0-9]9?[0-9]{8})|(?:\+55 ?\(?[1-9][0-9]\)? ?9?[0-9]{4}[- ]?[0-9]{4}))(?:[^0-9A-Za-z]|$)'''
 secretGroup = 1
 keywords = ["55"]
 
