@@ -107,7 +107,7 @@
 
     "@posthog/core": ["@posthog/core@1.69.2", "", { "dependencies": { "@posthog/types": "^1.427.0" } }, "sha512-toMfPKklwLW+a4ZY3/EzM3GNMVXmk2ylGb8NPJXRH4igXMoI8wgNL2jqXOiglWAXqFBLZGYFN1oQx6LVmUTxTg=="],
 
-    "@posthog/types": ["@posthog/types@1.427.0", "", {}, "sha512-2RPVfuGIx0iys78mTOcfdzN7/w7AM1Ak3yu9++4/FonPf08mwGqDkJjThz2dA/34666ToNw5Q4fZoFdgvfNUHw=="],
+    "@posthog/types": ["@posthog/types@1.427.1", "", {}, "sha512-Kx9hWf6Au64CrBLafscANAeswkRFUMs4zlU9/gwB2Hf/9ggU9YNjbw/MQA5tt7cbzTCkh+4fNIPjQeJz7/j63w=="],
 
     "@sec-ant/readable-stream": ["@sec-ant/readable-stream@0.4.1", "", {}, "sha512-831qok9r2t8AlxLko40y2ebgSDhenenCatLVeW/uBtnHPyhHOvG0C7TvfgecV+wHzIm5KUICgzmVpWS+IMEAeg=="],
 
